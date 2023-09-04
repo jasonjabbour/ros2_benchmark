@@ -22,6 +22,8 @@ from .ros2_benchmark_config import BenchmarkMode, MonitorPerformanceCalculatorsI
 from .ros2_benchmark_config import ROS2BenchmarkConfig
 from .ros2_benchmark_test import BenchmarkMetadata, ROS2BenchmarkTest
 from .utils.image_utility import ImageResolution, Resolution
+from .data_uploader import DataUploader
+from .device_info import DeviceInfo
 
 __all__ = [
     'BasicPerformanceCalculator',
@@ -33,4 +35,6 @@ __all__ = [
     'Resolution',
     'ROS2BenchmarkConfig',
     'ROS2BenchmarkTest',
+    'DataUploader', 
+    'DeviceInfo'
 ]

@@ -101,7 +101,54 @@ class CPUProfiler(Profiler):
         self._profile_data_list.append(profile_data)
 
         return profile_data
+    
 
+    def get_raw_results(self, log_file_path=None) -> np.array:
+        """
+        Return the raw CPU usage data for each recorded interval from the profiling log.
+
+        This method reads CPU usage data from the provided log file. Each entry in the 
+        log file represents the CPU usage percentages for each individual core of the system
+        during a specific interval. 
+
+        The resulting array's dimensions are (number of recorded intervals, number of CPU cores). 
+        For example, for a 3-core system with 10 intervals of recordings, the resulting array 
+        will be of shape (10, 3).
+
+        Parameters
+        ----------
+        log_file_path : str, optional
+            Path to the log file containing CPU profiling data. If not provided, 
+            the default log file set during profiling will be used.
+
+        Returns
+        -------
+        np.array
+            A 2D NumPy array where each row corresponds to recorded intervals and each column 
+            corresponds to a CPU core's usage percentage.
+
+        Raises
+        ------
+        AssertionError
+            If the profiler is still running or if there's no log file available for reading CPU profiling results.
+        """
+
+        assert not self._is_running, 'Cannot collect results until profiler has been stopped!'
+
+        log_file_path = self._log_file_path if log_file_path is None else log_file_path
+        assert self._log_file_path is not None, 'No log file for reading CPU  profiling results.'
+
+        cpu_data = []
+
+        with open(log_file_path) as logfile:
+            for line in logfile.readlines():
+                # Convert the string representation of the list to an actual list of floats
+                core_usages = [float(value.strip()) for value in line[1:-2].split(',')]
+                cpu_data.append(core_usages)
+
+        return np.array(cpu_data)
+
+    
     def reset(self):
         """Reset the profiler state."""
         self._profile_data_list.clear()

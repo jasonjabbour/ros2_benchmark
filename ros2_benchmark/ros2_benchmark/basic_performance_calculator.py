@@ -205,6 +205,20 @@ class BasicPerformanceCalculator():
             return {self._report_prefix: perf_data}
         return perf_data
 
+    def get_raw_performance_data(self,
+                              start_timestamps_ns: dict,
+                              end_timestamps_ns: dict) -> list:
+        """Return a list of latencies calculated from given start and end timestamps"""
+
+        # Match the start and end timestamps by message key instead        
+        values_start_timestamps_ns = list(start_timestamps_ns.values())
+        values_end_timestamps_ns = list(end_timestamps_ns.values())
+        latency_results = [(x - y)/10**6 for x, y in 
+            zip(values_end_timestamps_ns, values_start_timestamps_ns)]
+        
+        return latency_results
+
+
     def conclude_performance(self) -> dict:
         """Calculate final statistical performance outcome based on all results."""
         if len(self._perf_data_list) == 0:

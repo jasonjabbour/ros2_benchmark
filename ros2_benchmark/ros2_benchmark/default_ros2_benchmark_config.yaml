@@ -100,7 +100,8 @@ ros2_benchmark_config:
     enforce_publisher_rate: false
 
     # A list of fixed test publisher rate to be tested after the main fps benchmark test
-    additional_fixed_publisher_rate_tests: [10.0, 30.0, 60.0]
+    # additional_fixed_publisher_rate_tests: [10.0, 30.0, 60.0]
+    additional_fixed_publisher_rate_tests: [30.0]
 
     # Stop binary search once upper and lower target frequencies are within this range
     binary_search_terminal_interval_width: 10  # (hz)
@@ -151,4 +152,9 @@ ros2_benchmark_config:
     session_name: ""
     # Add power information
     add_power: "off"
+
+    # Upload data collected from benchmark to Google Sheet
+    upload_data: true
+    auth_json_path: 'data_uploader_auth.json'
+    google_sheet_url: 'https://docs.google.com/spreadsheets/d/1A7DrXTfHlQiBI5C7S9Re_xSCR-rfps24yvEAv1ncKHI/edit?usp=sharing'
 

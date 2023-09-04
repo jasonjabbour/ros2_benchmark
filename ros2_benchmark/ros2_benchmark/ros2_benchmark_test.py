@@ -49,6 +49,8 @@ from .ros2_benchmark_config import ROS2BenchmarkConfig
 from .utils.cpu_profiler import CPUProfiler
 from .utils.nsys_utility import NsysUtility
 from .utils.ros2_utility import ClientUtility
+from .data_uploader import DataUploader
+from .device_info import DeviceInfo
 
 
 from tracetools_launch.action import Trace
@@ -688,6 +690,7 @@ class ROS2BenchmarkTest(unittest.TestCase):
 
         # Calculate performance results
         performance_results = {}
+        latency_raw_data = None
         if self.config.option == 'with_monitor_node':
             for monitor_info in self.config.monitor_info_list:
                 end_timestamps = monitor_end_timestamps_map[monitor_info.service_name]
@@ -703,11 +706,29 @@ class ROS2BenchmarkTest(unittest.TestCase):
                     else:
                         performance_results.update(
                             calculator.calculate_performance(start_timestamps, end_timestamps))
-                    
+                    latency_raw_data = calculator.get_raw_performance_data(start_timestamps, end_timestamps)
             
         # Add CPU profiler results
+        cpu_usage_raw_data = None
         if self.config.enable_cpu_profiler:
             performance_results.update(self._cpu_profiler.get_results())
+            cpu_usage_raw_data = self._cpu_profiler.get_raw_results()     
+
+        # Add sending raw data to cloud
+        if self.config.upload_data: 
+            device_info = DeviceInfo()
+            uploader = DataUploader(self.config.auth_json_path)
+            uploader.upload_data(
+                google_sheet_url=self.config.google_sheet_url,
+                benchmark_name=self.config.benchmark_name,
+                method_type=self.get_method_type_name(),
+                hardware=device_info.get_device_name(),
+                fps=target_freq,
+                rosbag_path=self.config.input_data_path,
+                latency_data=latency_raw_data,
+                cpu_usage_data=cpu_usage_raw_data, 
+                power_data=None,
+            )
 
         return performance_results
 
@@ -987,3 +1008,12 @@ class ROS2BenchmarkTest(unittest.TestCase):
         for monitor_info in self.config.monitor_info_list:
             for calculator in monitor_info.calculators:
                 calculator.reset()
+    
+    def get_method_type_name(self):
+        """Get the name of the benchmarking method"""
+
+        method_type_name = 'grey'
+        if self.config.option == 'with_monitor_node':
+            method_type_name = 'black'
+
+        return method_type_name
